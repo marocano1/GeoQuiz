@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -13,7 +14,8 @@ public class QuizActivity extends AppCompatActivity {
 
     private Button mTrueButton;
     private Button mFalseButton;
-    private Button mNextButton;
+    private ImageButton mNextButton;
+    private ImageButton mPrevButton;
     private TextView mQuestionTextView;
     private Question[] mQuestionBank = new Question[] {
             new Question(R.string.question_oceans, true),
@@ -43,14 +45,30 @@ public class QuizActivity extends AppCompatActivity {
                 checkAnswer(false);
             }
         });
-        mNextButton = (Button)findViewById(R.id.next_button);
+        mNextButton = (ImageButton)findViewById(R.id.next_button);
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-                updateQuestion();
+                enableOrDisableButtons(mCurrentIndex + 1);
+                goToNextQuestion();
             }
         });
+        mPrevButton = (ImageButton)findViewById(R.id.prev_button);
+        mPrevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enableOrDisableButtons(mCurrentIndex - 1);
+                goToPreviousQuestion();
+            }
+        });
+        mQuestionTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enableOrDisableButtons(mCurrentIndex + 1);
+                goToNextQuestion();
+            }
+        });
+        enableOrDisableButtons(mCurrentIndex);
         updateQuestion();
     }
 
@@ -85,8 +103,30 @@ public class QuizActivity extends AppCompatActivity {
         } else {
             messageResId = R.string.incorrect_toast;
         }
-
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+    }
+
+    private void enableOrDisableButtons(int currentIndex) {
+        if (currentIndex == (mQuestionBank.length - 1)) {
+            mNextButton.setVisibility(View.INVISIBLE);
+            mPrevButton.setVisibility(View.VISIBLE);
+        } else if (currentIndex < 1) {
+            mPrevButton.setVisibility(View.INVISIBLE);
+            mNextButton.setVisibility(View.VISIBLE);
+        } else if(currentIndex > 0 && currentIndex < (mQuestionBank.length - 1)) {
+            mNextButton.setVisibility(View.VISIBLE);
+            mPrevButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void goToNextQuestion() {
+        mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+        updateQuestion();
+    }
+
+    private void goToPreviousQuestion() {
+        mCurrentIndex = (mCurrentIndex - 1);
+        updateQuestion();
     }
 
     private void updateQuestion() {
